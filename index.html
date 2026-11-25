@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Колонія(Дурка)</title>
+
+<style>
+:root {
+    --bg: #111318;
+    --panel: #1b1e26;
+    --panel2: #242833;
+    --text: #f1f2f5;
+    --muted: #9299a8;
+    --accent: #e5b94f;
+    --border: #303541;
+    --danger: #df5b61;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+}
+
+body.light {
+    --bg: #f1f2f5;
+    --panel: #ffffff;
+    --panel2: #e6e8ed;
+    --text: #20232b;
+    --muted: #707783;
+    --border: #d6d9e0;
+}
+
+header {
+    height: 75px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+}
+
+.logo {
+    font-size: 21px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.logo span { color: var(--accent); }
+
+.layout {
+    display: flex;
+    min-height: calc(100vh - 75px);
+}
+
+.sidebar {
+    width: 230px;
+    background: var(--panel);
+    padding: 20px 12px;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.sidebar button {
+    width: 100%;
+    display: block;
+    text-align: left;
+    background: transparent;
+    color: var(--muted);
+    border: 0;
+    padding: 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.sidebar button:hover,
+.sidebar button.active {
+    background: var(--panel2);
+    color: var(--accent);
+}
+
+.menu-title {
+    font-size: 11px;
+    color: var(--muted);
+    margin: 18px 12px 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+main {
+    flex: 1;
+    padding: 30px;
+    max-width: 1200px;
+    margin: auto;
+    width: 100%;
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+h1 { margin-top: 0; }
+h2 { font-size: 20px; }
+
+.muted { color: var(--muted); }
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.stat {
+    font-size: 30px;
+    font-weight: bold;
+    color: var(--accent);
+    margin-top: 12px;
+}
+
+input, textarea, select {
+    width: 100%;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 13px;
+    color: var(--text);
+    margin: 7px 0 12px;
+    font: inherit;
+}
+
+textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+button {
+    font: inherit;
+}
+
+.btn {
+    background: var(--accent);
+    color: #171717;
+    border: none;
+    border-radius: 7px;
+    padding: 11px 16px;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 4px 3px 4px 0;
+}
+
+.btn:hover { opacity: .85; }
+
+.btn.secondary {
+    background: var(--panel2);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn.danger {
+    background: var(--danger);
+    color: white;
+}
+
+.note, .task, .command {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 10px;
+    margin: 12px 0;
+    overflow-wrap: anywhere;
+}
+
+.note h3 { margin-top: 0; }
+
+.note-date {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 12px;
+}
+
+.note-actions {
+    margin-top: 12px;
+}
+
+.note-actions button {
+    margin: 3px;
+}
+
+.task {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.task input {
+    width: auto;
+    margin: 0;
+}
+
+.task.done span {
+    text-decoration: line-through;
+    color: var(--muted);
+}
+
+.command code {
+    color: var(--accent);
+    font-size: 15px;
+}
+
+.toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.toolbar input { flex: 1; min-width: 180px; }
+
+.empty {
+    color: var(--muted);
+    padding: 25px 5px;
+}
+
+#toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--accent);
+    color: #171717;
+    padding: 12px 18px;
+    border-radius: 8px;
+    display: none;
+    z-index: 10;
+}
+
+footer {
+    color: var(--muted);
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+}
+
+@media(max-width:700px) {
+    .layout { flex-direction: column; }
+    .sidebar {
+        width: 100%;
+        display: flex;
+        overflow-x: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+        padding: 8px;
+    }
+    .sidebar button {
+        min-width: max-content;
+        width: auto;
+        margin: 0 3px;
+        padding: 12px;
+    }
+    .menu-title { display: none; }
+    main { padding: 18px; }
+    header { padding: 0 15px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo"> <span>Психологічна підтримка</span></div>
+    <div class="muted">Персональний простір для розвитку</div>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+    <button class="active" data-page="home">⌂ Головна</button>
+    <button data-page="notes">▤ Нотатки</button>
+    <button data-page="favorites">★ Обране</button>
+    <button data-page="tasks">✓ Завдання</button>
+
+    <div class="menu-title">Інструменти</div>
+
+    <button data-page="commands">⌘ Команди</button>
+    <button data-page="trash">♲ Кошик</button>
+
+    <div class="menu-title">Інше</div>
+
+    <button data-page="settings">⚙ Налаштування</button>
+    <button data-page="about">ⓘ Хто тут батько</button>
+</aside>
+
+<main>
+
+<!-- ГОЛОВНА -->
+<section id="home" class="page active">
+    <h1>Ваш особистий простір</h1>
+    <p class="muted">Твій особистий простір для ідей.</p>
+
+    <div class="grid">
+        <div class="card">
+            <div class="muted">Усього нотаток</div>
+            <div class="stat" id="statNotes">0</div>
+        </div>
+
+        <div class="card">
+            <div class="muted">Обране</div>
+            <div class="stat" id="statFavorites">0</div>
+        </div>
+
+        <div class="card">
+            <div class="muted">Завдання</div>
+            <div class="stat" id="statTasks">0</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Швидкий доступ</h2>
+        <button class="btn" onclick="newNote()">+ Нова нотатка</button>
+        <button class="btn secondary" onclick="navigate('tasks')">Мої завдання</button>
+        <button class="btn secondary" onclick="navigate('commands')">Переглянути команди</button>
+    </div>
+
+    <h2>Останні нотатки</h2>
+    <div id="recentNotes"></div>
+</section>
+
+<!-- НОТАТКИ -->
+<section id="notes" class="page">
+    <h1>Мої нотатки</h1>
+
+    <input id="noteTitle" placeholder="Назва нотатки">
+
+    <textarea id="noteText" placeholder="Напиши щось важливе..."></textarea>
+
+    <button class="btn" onclick="saveNote()">Зберегти нотатку</button>
+    <button class="btn secondary" onclick="cancelEdit()">Очистити</button>
+
+    <hr style="border-color:var(--border); margin:25px 0;">
+
+    <h2>Усі записи</h2>
+
+    <input id="searchNotes" placeholder="Пошук нотаток..." oninput="render()">
+
+    <div id="notesList"></div>
+</section>
+
+<!-- ОБРАНЕ -->
+<section id="favorites" class="page">
+    <h1>Обране ★</h1>
+    <p class="muted">Тут зберігаються важливі нотатки.</p>
+    <div id="favoritesList"></div>
+</section>
+
+<!-- ЗАВДАННЯ -->
+<section id="tasks" class="page">
+    <h1>Мої завдання</h1>
+
+    <input id="taskInput" placeholder="Напиши нове завдання...">
+    <button class="btn" onclick="addTask()">Додати завдання</button>
+
+    <h2>Список справ</h2>
+    <div id="tasksList"></div>
+</section>
+
+<!-- КОМАНДИ -->
+<section id="commands" class="page">
+    <h1>Центр команд</h1>
+    <p class="muted">Керуй блокнотом за допомогою текстових команд.</p>
+
+    <div class="card">
+        <h2>Виконати команду</h2>
+        <input id="commandInput" placeholder="Введи /help та натисни Enter">
+        <button class="btn" onclick="runCommand()">Виконати</button>
+        <div id="commandResult" class="muted"></div>
+    </div>
+
+    <h2>Список команд</h2>
+
+    <div class="command">
+        <code>/help</code>
+        <p>Показує список доступних команд.</p>
+    </div>
+
+    <div class="command">
+        <code>/new</code>
+        <p>Відкриває створення нової нотатки.</p>
+    </div>
+
+    <div class="command">
+        <code>/notes</code>
+        <p>Переходить до всіх нотаток.</p>
+    </div>
+
+    <div class="command">
+        <code>/favorites</code>
+        <p>Відкриває обрані нотатки.</p>
+    </div>
+
+    <div class="command">
+        <code>/tasks</code>
+        <p>Відкриває список завдань.</p>
+    </div>
+
+    <div class="command">
+        <code>/trash</code>
+        <p>Відкриває кошик.</p>
+    </div>
+
+    <div class="command">
+        <code>/home</code>
+        <p>Повертає на головну сторінку.</p>
+    </div>
+
+    <div class="command">
+        <code>/theme</code>
+        <p>Змінює світлу або темну тему.</p>
+    </div>
+
+    <div class="command">
+        <code>/export</code>
+        <p>Завантажує резервну копію даних.</p>
+    </div>
+</section>
+
+<!-- КОШИК -->
+<section id="trash" class="page">
+    <h1>Кошик</h1>
+    <p class="muted">Видалені нотатки можна відновити.</p>
+
+    <div id="trashList"></div>
+
+    <button class="btn danger" onclick="emptyTrash()">Очистити кошик</button>
+</section>
+
+<!-- НАЛАШТУВАННЯ -->
+<section id="settings" class="page">
+    <h1>Налаштування</h1>
+
+    <div class="card">
+        <h2>Оформлення</h2>
+        <p>Вибери тему сайту:</p>
+        <button class="btn" onclick="setTheme('dark')">Темна тема</button>
+        <button class="btn secondary" onclick="setTheme('light')">Світла тема</button>
+    </div>
+
+    <div class="card" style="margin-top:15px">
+        <h2>Резервна копія</h2>
+        <p class="muted">Збережи свої нотатки та завдання у файл.</p>
+        <button class="btn" onclick="exportData()">Експортувати дані</button>
+    </div>
+</section>
+
+<!-- ПРО САЙТ -->
+<section id="about" class="page">
+    <h1>Про сайт</h1>
+
+    <div class="card">
+        <h2>Психологічна підтримка</h2>
+        <p>Персональний цифровий помічник.</p>
+        <p>Версія: 0.1.10</p>
+        <p>Можливості: нотатки, завдання, обране, кошик, команди та налаштування.</p>
+        <p class="muted">Створений на HTML, CSS та JavaScript.</p>
+    </div>
+</section>
+
+<footer>Психологічна Підтримка</footer>
+
+</main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+
+// ДАНІ
+let notes = load("notes", []);
+let tasks = load("tasks", []);
+let trash = load("trash", []);
+let editingId = null;
+
+function load(key, fallback) {
+    try {
+        return JSON.parse(localStorage.getItem("notebook_" + key)) || fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+function store() {
+    localStorage.setItem("notebook_notes", JSON.stringify(notes));
+    localStorage.setItem("notebook_tasks", JSON.stringify(tasks));
+    localStorage.setItem("notebook_trash", JSON.stringify(trash));
+}
+
+function id() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+function toast(message) {
+    const el = document.getElementById("toast");
+    el.textContent = message;
+    el.style.display = "block";
+    setTimeout(() => el.style.display = "none", 2200);
+}
+
+// НАВІГАЦІЯ
+function navigate(page) {
+    document.querySelectorAll(".page").forEach(el => {
+        el.classList.remove("active");
+    });
+
+    document.querySelectorAll(".sidebar button").forEach(el => {
+        el.classList.toggle("active", el.dataset.page === page);
+    });
+
+    document.getElementById(page).classList.add("active");
+    render();
+}
+
+document.querySelectorAll(".sidebar button").forEach(button => {
+    button.addEventListener("click", () => navigate(button.dataset.page));
+});
+
+// НОТАТКИ
+function newNote() {
+    navigate("notes");
+    cancelEdit();
+    document.getElementById("noteTitle").focus();
+}
+
+function saveNote() {
+    const title = document.getElementById("noteTitle").value.trim();
+    const text = document.getElementById("noteText").value.trim();
+
+    if (!title && !text) {
+        toast("Введи текст або назву!");
+        return;
+    }
+
+    if (editingId) {
+        const note = notes.find(n => n.id === editingId);
+        if (note) {
+            note.title = title || "Без назви";
+            note.text = text;
+            note.updated = new Date().toLocaleString("uk-UA");
+        }
+        toast("Нотатку оновлено!");
+    } else {
+        notes.unshift({
+            id: id(),
+            title: title || "Без назви",
+            text,
+            favorite: false,
+            date: new Date().toLocaleString("uk-UA")
+        });
+        toast("Нотатку збережено!");
+    }
+
+    store();
+    cancelEdit();
+    render();
+}
+
+function cancelEdit() {
+    editingId = null;
+    document.getElementById("noteTitle").value = "";
+    document.getElementById("noteText").value = "";
+}
+
+function editNote(noteId) {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+
+    editingId = noteId;
+    document.getElementById("noteTitle").value = note.title;
+    document.getElementById("noteText").value = note.text;
+    navigate("notes");
+    document.getElementById("noteTitle").focus();
+}
+
+function deleteNote(noteId) {
+    const index = notes.findIndex(n => n.id === noteId);
+    if (index < 0) return;
+
+    trash.unshift(notes.splice(index, 1)[0]);
+    store();
+    render();
+    toast("Переміщено до кошика");
+}
+
+function toggleFavorite(noteId) {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+
+    note.favorite = !note.favorite;
+    store();
+    render();
+}
+
+function noteCard(note) {
+    const div = document.createElement("div");
+    div.className = "note";
+
+    const title = document.createElement("h3");
+    title.textContent = note.title;
+
+    const content = document.createElement("p");
+    content.style.whiteSpace = "pre-wrap";
+    content.textContent = note.text;
+
+    const date = document.createElement("div");
+    date.className = "note-date";
+    date.textContent = note.updated
+        ? "Оновлено: " + note.updated
+        : "Створено: " + note.date;
+
+    const actions = document.createElement("div");
+    actions.className = "note-actions";
+
+    const favorite = document.createElement("button");
+    favorite.className = "btn secondary";
+    favorite.textContent = note.favorite ? "★ В обраному" : "☆ В обране";
+    favorite.onclick = () => toggleFavorite(note.id);
+
+    const edit = document.createElement("button");
+    edit.className = "btn secondary";
+    edit.textContent = "Редагувати";
+    edit.onclick = () => editNote(note.id);
+
+    const del = document.createElement("button");
+    del.className = "btn danger";
+    del.textContent = "Видалити";
+    del.onclick = () => deleteNote(note.id);
+
+    actions.append(favorite, edit, del);
+    div.append(title, content, date, actions);
+    return div;
+}
+
+// ЗАВДАННЯ
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const text = input.value.trim();
+
+    if (!text) {
+        toast("Введи завдання!");
+        return;
+    }
+
+    tasks.unshift({id: id(), text, done: false});
+    input.value = "";
+    store();
+    render();
+    toast("Завдання додано!");
+}
+
+function toggleTask(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    task.done = !task.done;
+    store();
+    render();
+}
+
+function deleteTask(taskId) {
+    tasks = tasks.filter(t => t.id !== taskId);
+    store();
+    render();
+}
+
+function taskCard(task) {
+    const div = document.createElement("div");
+    div.className = "task" + (task.done ? " done" : "");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = task.done;
+    checkbox.onchange = () => toggleTask(task.id);
+
+    const span = document.createElement("span");
+    span.style.flex = "1";
+    span.textContent = task.text;
+
+    const del = document.createElement("button");
+    del.className = "btn danger";
+    del.textContent = "Видалити";
+    del.onclick = () => deleteTask(task.id);
+
+    div.append(checkbox, span, del);
+    return div;
+}
+
+// КОШИК
+function restoreNote(noteId) {
+    const index = trash.findIndex(n => n.id === noteId);
+    if (index < 0) return;
+
+    notes.unshift(trash.splice(index, 1)[0]);
+    store();
+    render();
+    toast("Нотатку відновлено!");
+}
+
+function permanentlyDelete(noteId) {
+    trash = trash.filter(n => n.id !== noteId);
+    store();
+    render();
+}
+
+function emptyTrash() {
+    if (!confirm("Видалити всі записи з кошика назавжди?")) return;
+    trash = [];
+    store();
+    render();
+    toast("Кошик очищено");
+}
+
+// КОМАНДИ
+function runCommand() {
+    const input = document.getElementById("commandInput");
+    const command = input.value.trim().toLowerCase();
+    const result = document.getElementById("commandResult");
+
+    const commands = {
+        "/help": () => {
+            result.textContent = "Команди: /help, /new, /notes, /favorites, /tasks, /trash, /home, /theme, /export";
+        },
+        "/new": () => {
+            newNote();
+            result.textContent = "Створення нової нотатки.";
+        },
+        "/notes": () => {
+            navigate("notes");
+            result.textContent = "Відкрито нотатки.";
+        },
+        "/favorites": () => {
+            navigate("favorites");
+            result.textContent = "Відкрито обране.";
+        },
+        "/tasks": () => {
+            navigate("tasks");
+            result.textContent = "Відкрито завдання.";
+        },
+        "/trash": () => {
+            navigate("trash");
+            result.textContent = "Відкрито кошик.";
+        },
+        "/home": () => {
+            navigate("home");
+            result.textContent = "Повернення на головну.";
+        },
+        "/theme": () => {
+            setTheme(document.body.classList.contains("light") ? "dark" : "light");
+            result.textContent = "Тему змінено.";
+        },
+        "/export": () => {
+            exportData();
+            result.textContent = "Підготовлено резервну копію.";
+        }
+    };
+
+    if (commands[command]) {
+        commands[command]();
+    } else {
+        result.textContent = "Невідома команда. Введи /help.";
+    }
+}
+
+document.getElementById("commandInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") runCommand();
+});
+
+document.getElementById("taskInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") addTask();
+});
+
+// ТЕМА
+function setTheme(theme) {
+    document.body.classList.toggle("light", theme === "light");
+    localStorage.setItem("notebook_theme", theme);
+}
+
+if (localStorage.getItem("notebook_theme") === "light") {
+    setTheme("light");
+}
+
+// ЕКСПОРТ
+function exportData() {
+    const data = {
+        notes,
+        tasks,
+        trash,
+        exported: new Date().toISOString()
+    };
+
+    const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        {type: "application/json"}
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "my-notebook-backup.json";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast("Резервну копію завантажено!");
+}
+
+// ОНОВЛЕННЯ ІНТЕРФЕЙСУ
+function fillList(elementId, items, emptyText, renderer) {
+    const el = document.getElementById(elementId);
+    el.replaceChildren();
+
+    if (!items.length) {
+        const p = document.createElement("p");
+        p.className = "empty";
+        p.textContent = emptyText;
+        el.appendChild(p);
+        return;
+    }
+
+    items.forEach(item => el.appendChild(renderer(item)));
+}
+
+function render() {
+    const query = (document.getElementById("searchNotes")?.value || "").toLowerCase();
+
+    const filtered = notes.filter(n =>
+        (n.title + " " + n.text).toLowerCase().includes(query)
+    );
+
+    fillList("notesList", filtered, "Нотаток поки немає.", noteCard);
+
+    fillList(
+        "favoritesList",
+        notes.filter(n => n.favorite),
+        "В обраному поки нічого немає.",
+        noteCard
+    );
+
+    fillList(
+        "recentNotes",
+        notes.slice(0, 3),
+        "Створи свою першу нотатку!",
+        noteCard
+    );
+
+    fillList("tasksList", tasks, "Завдань поки немає.", taskCard);
+
+    const trashEl = document.getElementById("trashList");
+    trashEl.replaceChildren();
+
+    if (!trash.length) {
+        const p = document.createElement("p");
+        p.className = "empty";
+        p.textContent = "Кошик порожній.";
+        trashEl.appendChild(p);
+    } else {
+        trash.forEach(note => {
+            const div = document.createElement("div");
+            div.className = "note";
+
+            const title = document.createElement("b");
+            title.textContent = note.title;
+
+            const restore = document.createElement("button");
+            restore.className = "btn";
+            restore.textContent = "Відновити";
+            restore.onclick = () => restoreNote(note.id);
+
+            const del = document.createElement("button");
+            del.className = "btn danger";
+            del.textContent = "Видалити назавжди";
+            del.onclick = () => {
+                if (confirm("Видалити нотатку назавжди?")) {
+                    permanentlyDelete(note.id);
+                }
+            };
+
+            div.append(title, document.createElement("br"), restore, del);
+            trashEl.appendChild(div);
+        });
+    }
+
+    document.getElementById("statNotes").textContent = notes.length;
+    document.getElementById("statFavorites").textContent =
+        notes.filter(n => n.favorite).length;
+    document.getElementById("statTasks").textContent =
+        tasks.filter(t => !t.done).length;
+}
+
+// ГАРЯЧІ КЛАВІШІ
+document.addEventListener("keydown", e => {
+    if (e.ctrlKey && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        navigate("notes");
+        document.getElementById("searchNotes").focus();
+    }
+
+    if (e.ctrlKey && e.key === "Enter" &&
+        document.getElementById("notes").classList.contains("active")) {
+        saveNote();
+    }
+
+    if (e.key === "Escape") {
+        cancelEdit();
+    }
+});
+
+render();
+
+</script>
+</body>
+</html>
